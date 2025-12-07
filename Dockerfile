@@ -2,7 +2,9 @@
 
 FROM scratch
 
-LABEL maintainer="username"
+LABEL maintainer="Nementon"
+ENV STGUIADDRESS=""
+ENV STGUIHOST=""
+ENV STGUIPORT=""
 
-# copy local files
 COPY root/ /

@@ -1,0 +1,20 @@
+#!/usr/bin/with-contenv bash
+
+# This is an install script that is designed to run after init-mods-package-install
+# so it can take advantage of packages installed
+# init-mods-end depends on this script so that later init and services wait until this script exits
+
+echo "[mod-syncthing-guiaddress-override] **** Patching S6 Syncthing Service run ****"
+if ! grep 'gui-address="0.0.0.0:8384"' /etc/s6-overlay/s6-rc.d/svc-syncthing/run > /dev/null; then
+  echo "[mod-syncthing-guiaddress-override] [!] Failed to find hardcoded --gui-address in svc-syncthing service, patching aborted."
+  exit;
+fi
+
+basedir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+cp /etc/s6-overlay/s6-rc.d/svc-syncthing/run /etc/s6-overlay/s6-rc.d/svc-syncthing/run.bak
+cp /run/s6-rc/servicedirs/svc-syncthing/run /run/s6-rc/servicedirs/svc-syncthing/run.bak
+cat "${basedir}/svc-syncthing-run-patched" > /etc/s6-overlay/s6-rc.d/svc-syncthing/run
+cat "${basedir}/svc-syncthing-run-patched" > /run/s6-rc/servicedirs/svc-syncthing/run
+
+echo "[mod-syncthing-guiaddress-override] [+] S6 Syncthing Service Patched - Restarting svc-syncthing"
+s6-svc -t /run/service/svc-syncthing && s6-svc -u /run/service/svc-syncthing
